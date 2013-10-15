@@ -17,7 +17,7 @@ void UT_freesplitpath(const char *pathP, char *driveP, char *dirP,
 	char bName[PATH_MAX];
 
 	(*driveP) = '\0'; /* Set driveP (always empty on linux) */
-
+	printf("Hello");
 	strcpy(tmp, pathP);
 	/* Shotcut if path is to folder to mimic */
 	if(*( tmp + strlen(tmp) - 1) == '/') {
@@ -26,14 +26,20 @@ void UT_freesplitpath(const char *pathP, char *driveP, char *dirP,
 		(*extP) = '\0';
 		return;
 	}
-
-	strcpy(dirP, strcat(dirname(tmp), "/")); /* Set dirP, append / to mimic */
-	
+	printf("%s\n", (dirname(tmp) == NULL) ? "NULL": dirname(tmp));
+	if(dirname(tmp) != NULL) {
+		strcpy(dirP, strcat(dirname(tmp), "/")); /* Set dirP, append / to mimic */
+	}
+	else {
+		(*dirP) = '\0';
+	}
 	strcpy(tmp, pathP);
+	printf("%s\n", (basename(tmp)) ? "NULL" : basename(tmp));
 	strcpy(bName, basename(tmp));
 
 	strcpy(tmp,bName);
     char* lastDot = strrchr(tmp, '.');
+	printf("%s\n", (lastDot == NULL)? "NULL":lastDot);
 	if(lastDot != NULL) {
 	    strcpy(extP, tmp+(lastDot-tmp)); /* Set extP */
 
