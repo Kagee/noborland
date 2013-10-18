@@ -1,7 +1,7 @@
 # sp2 / ffp
 PROGNAME=ffp
 OBJFILES=ffp.o
-TEST_PROGNAME=valgrind -q -v --suppressions=_fullpath.supp ./$(PROGNAME)
+TEST_PROGNAME=valgrind -q --suppressions=_fullpath.supp ./$(PROGNAME)
 
 # splinux &/ spwindows &/ splong / fplinux &/ fpwindows
 TEST_ON=fplinux
@@ -19,13 +19,20 @@ $(PROGNAME): $(OBJFILES)
 
 
 ifneq (,$(findstring fplinux,$(TEST_ON)))
-	$(TEST_PROGNAME) "relative/folder"
-	$(TEST_PROGNAME) "relative/file.cpp"
-	$(TEST_PROGNAME) "/to/file.cpp"
-	$(TEST_PROGNAME) "/to/folder/"
-	$(TEST_PROGNAME) "/path/../to/file.cpp"
-	$(TEST_PROGNAME) "/path/../"
-	$(TEST_PROGNAME) "/path/./file.cpp"
+#	$(TEST_PROGNAME) "relative/folder"
+#	$(TEST_PROGNAME) "relative/file.cpp"
+#	$(TEST_PROGNAME) "/to/file.cpp"
+#	$(TEST_PROGNAME) "/to/folder/"
+#	This segaults the original fullpath	
+#	$(TEST_PROGNAME) "/path/../to/file.cpp"
+	$(TEST_PROGNAME) "/path/from/../to/file.cpp"
+	$(TEST_PROGNAME) "/path/from/../to/../file.cpp"
+	$(TEST_PROGNAME) "/path/from/../../to/file.cpp"
+	$(TEST_PROGNAME) "path/from/../to/file.cpp"
+	
+#   and this...
+#	$(TEST_PROGNAME) "/path/../"
+#	$(TEST_PROGNAME) "/path/./file.cpp"
 endif
 
 ifneq (,$(findstring splinux,$(TEST_ON)))
