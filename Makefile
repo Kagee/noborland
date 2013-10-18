@@ -25,15 +25,16 @@ ifneq (,$(findstring fplinux,$(TEST_ON)))
 #	$(TEST_PROGNAME) "/to/folder/"
 #	This segaults the original fullpath	
 #	$(TEST_PROGNAME) "/path/../to/file.cpp"
-#	$(TEST_PROGNAME) "/path/from/../to/file.cpp"
-#	$(TEST_PROGNAME) "/path/from/../to/../file.cpp"
+	$(TEST_PROGNAME) "/path/from/../to/file.cpp"
+	$(TEST_PROGNAME) "/path/from/../to/../file.cpp"
 	# The old code appears to be horribly confused here
 	$(TEST_PROGNAME) "path/from/../../to/file.cpp"
-#	$(TEST_PROGNAME) "path/from/../to/file.cpp"
-	
+	$(TEST_PROGNAME) "path/from/../to/file.cpp"
+	$(TEST_PROGNAME) "./path/from/../to/file.cpp"
+	$(TEST_PROGNAME) "./path/from/./to/../file.cpp"	
 #   and this...
-#	$(TEST_PROGNAME) "/path/../"
-#	$(TEST_PROGNAME) "/path/./file.cpp"
+	$(TEST_PROGNAME) "/path/../"
+	$(TEST_PROGNAME) "/path/./file.cpp"
 endif
 
 ifneq (,$(findstring splinux,$(TEST_ON)))

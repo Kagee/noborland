@@ -34,88 +34,90 @@ char * _ffullpath(char *buffer, const char *pathname, size_t maxlen) {
 	if(maxlen < _MAX_PATH) {
 		return NULL;
 	}
-	int PATHLEN = strlen(pathname);
 	char * wpath;
-	wpath = new (std::nothrow) char[PATHLEN +1];
+	wpath = new (std::nothrow) char[_MAX_PATH];
 	if (wpath == NULL) { // could not allocate memory
 		return NULL;
 	}
 	
 	char * wpath2;
-	wpath2 = new (std::nothrow) char[PATHLEN +1];
+	wpath2 = new (std::nothrow) char[_MAX_PATH];
 	if (wpath2 == NULL) {
 		delete [] wpath;
 		return NULL;
 	}
-	char * wpath3; // working path
-    wpath3 = new (std::nothrow) char[PATHLEN +1];
-    if (wpath3 == NULL) {
-        delete [] wpath;
-		delete [] wpath2;
-        return NULL;
-    }
 
-	printf("Hello world");
 	buffer[0] = '\0';
-	strncpy(wpath, pathname, PATHLEN+1);	
-	strncpy(wpath2, pathname, PATHLEN+1);
-    strncpy(wpath3, pathname, PATHLEN+1);
+	strncpy(wpath, pathname, _MAX_PATH);	
+	strncpy(wpath2, pathname, _MAX_PATH);
 
-	//strcpy(wpath, pathname);
-    //strcpy(wpath2, pathname);
-    //strcpy(wpath3, pathname);	
-	char prev[5];
-	prev[0] = UT_SLASH; prev[1] = '.';  prev[2] = '.';  
-	prev[3] = UT_SLASH; prev[4] = '\0';
-
-	char same[4];
-	same[0] = UT_SLASH; same[1] = '.';
-	same[2] = UT_SLASH; same[3] = '\0';
+	/* Make relativer paths of ./foo-paths */
+	if(pathname[0] == '.' && pathname[1] == UT_SLASH) {
+		strncpy(wpath, pathname+2, _MAX_PATH);
+		strncpy(wpath, pathname+2, _MAX_PATH);
+	}
 
 	char * prevPos = NULL;
 
+	char prev[5] = { UT_SLASH, '.', '.', UT_SLASH, '\0' };
+
 	int i = -1;
+	/* Remove /../ and parent folder */
 	while ((prevPos = strstr(wpath, prev)) != NULL) {
-		printf("AFTER PREV: %s\n", (prevPos+strlen(prev)));
-		while(prevPos >= wpath && prevPos[i] != UT_SLASH) {
+		/* Walk forward in the string until first slash or start of string */
+		while((prevPos + i) >= wpath && prevPos[i] != UT_SLASH) {
 			prevPos[i--] = '\0';
 		}
-		
-		printf("BEFORE PREV: %s\n", wpath);
-		UT_StrCopy(wpath2, wpath, PATHLEN);
-		strncat(wpath2, (prevPos+strlen(prev)), PATHLEN);
-		UT_StrCopy(wpath, wpath2, PATHLEN);
-		printf("NO PREV: %s\n", wpath2);
+		UT_StrCopy(wpath2, wpath, _MAX_PATH);
+		strncat(wpath2, (prevPos+strlen(prev)), _MAX_PATH);
+		UT_StrCopy(wpath, wpath2, _MAX_PATH);
 		i = -1;
 	}
+
+	char same[4] = { UT_SLASH, '.', UT_SLASH, '\0' };
+
+	/* replace /./ with nothing */
+	while ((prevPos = strstr(wpath, same)) != NULL) {
+        prevPos[1] = '\0';
+		UT_StrCopy(wpath2, wpath, _MAX_PATH);
+        strncat(wpath2, (prevPos+strlen(same)), _MAX_PATH);
+        UT_StrCopy(wpath, wpath2, _MAX_PATH);
+        i = -1;
+    }
 	
-/*	if(wpath[0] != UT_SLASH) {
-		if(wpath2 == NULL) {
-			printf("wpath2 er NULL??");
-		}
-		if((getcwd(wpath2, PATHLEN)) == NULL) {
-			printf("I died!");
+	/* prepend cwd on relative paths */
+	if(wpath[0] != UT_SLASH) {
+		if(getcwd(wpath2, _MAX_PATH) == NULL) {
 			delete [] wpath;
 		    delete [] wpath2;
-		    delete [] wpath3;
 			return NULL;
 		}
-		printf("CWD: %s", wpath2);
-//		strncat(wpath2, "/", _MAX_PATH-(strlen(wpath2)+1));
-//		UT_StrCopy(wpath, wpath2, _MAX_PATH);
+		/* getcwd gives ut the path w/o ending slash */
+		char slash[2] =  {UT_SLASH, '\0'};
+		strncat(wpath2, slash, _MAX_PATH-(strlen(wpath2)+1));
+		strncat(wpath2, wpath, _MAX_PATH)-(strlen(wpath2)+1);
+		UT_StrCopy(wpath, wpath2, _MAX_PATH);
 	}
-*/
+
 	
-	printf("PATH: %s\n", wpath);
-//	if(wpath[0] == '/') {
-//		UT_StrCopy(buffer, wpath+1, maxlen);
-//	} else {
-		UT_StrCopy(buffer, wpath, maxlen);
-//	}
-	delete [] wpath;
-	delete [] wpath2;
-	delete [] wpath3;
-	return buffer;
+	//printf("PATH: %s\n", wpath);
+	int endLen = strlen(wpath);
+	int startAt = 0;
+	if(wpath[0] == '/') { 
+		endLen--;
+		startAt = 1;
+	}
+
+	if (endLen < maxlen) {
+       	UT_StrCopy(buffer, (wpath+startAt), maxlen);
+		delete [] wpath;
+    	delete [] wpath2;
+		return buffer;
+	} else {
+		delete [] wpath;
+    	delete [] wpath2;
+		return NULL;
+	}
 }
 
 int main(int argc, char** args) {
@@ -125,16 +127,16 @@ int main(int argc, char** args) {
 	//	printf("Input: %s\n", args[1]);
 	
    char absPath[_MAX_PATH], absPath2[_MAX_PATH];
-	 absPath[0] = '\0';
+	absPath[0] = '\0';
 	absPath2[0] = '\0';
-   _ffullpath(absPath2, args[1], _MAX_PATH); 
+	_ffullpath(absPath2, args[1], _MAX_PATH); 
 	_fullpath (absPath, args[1], _MAX_PATH);
-//   if (!(strcmp(absPath, absPath2) == 0)) {
-	printf("THEY DIFFER:\n");
-	printf("PRIO: '%s'\n", absPath);
-	printf("FREE: '%s'\n\n", absPath2);   		
-//   } else {
-//	printf("BOTH: '%s'\n\n", absPath);
-//   }
+	if (!(strcmp(absPath, absPath2) == 0)) {
+		printf("THEY DIFFER:\n");
+		printf("PRIO: '%s'\n", absPath);
+		printf("FREE: '%s'\n\n", absPath2);   		
+	} else {
+		printf("BOTH: '%s'\n\n", absPath);
+	}
 }
 
