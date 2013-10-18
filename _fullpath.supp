@@ -1,0 +1,6 @@
+{
+	   _fullpath_read_minus_one
+	   Memcheck:Addr1
+	   fun:_Z9_fullpathPcPKcm
+	   fun:main
+}
