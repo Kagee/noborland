@@ -12,6 +12,7 @@ fname or ext extends beyond _MAX_DIR, _MAX_FNAME and  _MAX_EXT
 
 _ffullpath
 ==========
-Mimics _fullpath.
+Mimics _fullpath. You must modify the FYBA code 
+to export _fullpath for the test to work.
 Testcases can be found in the supplied makefile.
 No know faliures. Better handling on some paths.
