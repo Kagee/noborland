@@ -1,35 +1,29 @@
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <climits>
-#include <fyut.h>
+#include <cstdlib> // malloc etc
+#include <cstring> // strcat etc 
 #include <new> // nothrow
-#include<libgen.h>
+#include <fyut.h>
+
 /*
-Description     _fullpath converts the relative path name name 'pathname'
-                to a fully qualified pathname, stored in 'buffer'.  The
-                     relative path can contain ".\" and "..".
-
-                The maximum size of the supplied buffer is 'maxlen'.
-                If the fully qualified path is longer than 'maxlen',
-                NULL is returned.  The buffer should be at least _MAX_PATH
-                bytes long (this constant is defined in stdlib.h).
-
-                If 'buffer' is NULL, a buffer to store the fully qualified
-                path is allocated and is returned.  The calling program
-                must free this buffer with GlobalFree(() when it is no longer needed.
-
-                If the pathname does not specify a disk drive, the current
-i                drive is used.
-
- Allocate a temporary buffer to hold the fully qualified path.
-if ((tempbuf = (char*)UT_MALLOC(_MAX_PATH*2+1)) == NULL)
-      return (NULL);
-
-
-return (char*)(realloc(tempbuf,len));
+CH _ffullpath                    
+CD ==============================================================
+CD Makes a complete path from a non-complete path. Handles "..",
+CD "." and will prepend the path with current working directory
+CD if it is relative (does not start with slash)
+CD
+CD The function returns buffer, pointer to memory area containing 
+CD full path if buffer was NULL, or NULL if a error occured
+CD (e.g. full path was longer than maxlen and a buffer 
+CD was supplied.) The pointer should be free'd by calling code.
+CD
+CD Parameters:
+CD Type        Name             I/O  Explanation
+CD -------------------------------------------------------------
+CD char       *buffer           i/o  Buffer to put full path into or NULL.
+CD const char *pathname          i   Pathname to expand
+CD size_t     maxlen             i   Size of buffer.
+CD char *                        r   buffer, pointer to char[] or NULL
+CD  ==============================================================
 */
-
 char * _ffullpath(char *buffer, const char *pathname, size_t maxlen) {
 	if(maxlen < _MAX_PATH) {
 		return NULL;
