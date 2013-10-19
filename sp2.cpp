@@ -10,7 +10,6 @@
 void UT_splitpath(const char *pathP, char *driveP, char *dirP,
                   char *nameP, char *extP);
 
-void UT_splitFN(char *filename, char* name, char* ext);
 void UT_splitFN(char *filename, char* name, char* ext) {
 	char* lastDot = strrchr(filename, '.');
 	if(lastDot != NULL) {
@@ -30,10 +29,23 @@ void UT_splitFN(char *filename, char* name, char* ext) {
 	}
 }
 
-/* This function mimics UT_splitpath 
-	Testcases can be found in the supplied makefile.
-	The only know failure to mimic is when the resulting dir,
-	fname or ext extends beyond _MAX_DIR, _MAX_FNAME and  _MAX_EXT */
+/*
+CH UT_splitpath_free                    
+CD ==============================================================
+CD Splits a path into drice (X: for windows, "" for linux),
+CD directory, filename (w/o extension) and extension.
+CD
+CD Parameters:
+CD Type        Name             I/O  Explanation
+CD -------------------------------------------------------------
+CD const char *pathP             i  Path to split
+CD char       *driveP            o  Drive-part of path
+CD char       *dirP              o  Directory-part
+CD char       *nameP             o  Filename w/o extension
+CD char       *extP              o  extension
+CD  ==============================================================
+*/
+
 void UT_splitpath_free(const char *pathP, char *driveP, char *dirP,
                   char *nameP, char *extP) {
 	char local_path[PATH_MAX]; /* Copy of pathP i case we modify it */
@@ -90,20 +102,22 @@ int main(int argc, char** args) {
 	if(argc < 2) {
 		exit(1);
 	}
-	//	printf("Input: %s\n", args[1]);
 	
    char fil[_MAX_PATH],sdir[_MAX_PATH];
    char drive1[_MAX_DRIVE],dir1[_MAX_DIR],fname1[_MAX_FNAME],ext1[_MAX_EXT];
    char drive2[_MAX_DRIVE],dir2[_MAX_DIR],fname2[_MAX_FNAME],ext2[_MAX_EXT];
-	//printf("DRIVE: %d, DIR: %d, FNAME: %d, EXT: %d", _MAX_DRIVE,_MAX_DIR,_MAX_FNAME,_MAX_EXT);
-	// DRIVE: 3, DIR: 256, FNAME: 256, EXT: 256
-   // Splitt filnavnet
    UT_splitpath(args[1],drive1,dir1,fname1,ext1);
    UT_splitpath_free(args[1],drive2,dir2,fname2,ext2); 
-   if (!(strcmp(drive1, drive2) == 0 && strcmp(dir1, dir2) == 0 && strcmp(fname1, fname2) == 0 && strcmp(ext1, ext1) == 0)) {
-	   printf("THEY DIFFER:\n");
-	printf("PRIO: '%s' '%s' '%s' '%s'\n", drive1,dir1,fname1,ext1);
-	printf("FREE: '%s' '%s' '%s' '%s'\n\n", drive2,dir2,fname2,ext2);   		
-   }
+	if (!(
+			strcmp(drive1, drive2) == 0 && 
+			strcmp(dir1, dir2) == 0 && 
+			strcmp(fname1, fname2) == 0 && 
+			strcmp(ext1, ext1) == 0)
+	) {
+	printf("\x1b[31mPRIO: '%s' '%s' '%s' '%s'\n", drive1,dir1,fname1,ext1);
+	printf("FREE: '%s' '%s' '%s' '%s'\x1b[0m\n\n", drive2,dir2,fname2,ext2);   		
+	} else {
+		printf("\x1b[32mBOTH: '%s' '%s' '%s' '%s'\x1b[0m\n\n", drive1,dir1,fname1,ext1);
+	}
 }
 
