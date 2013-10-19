@@ -90,9 +90,13 @@ char * _ffullpath(char *buffer, const char *pathname, size_t maxlen) {
 
 	int endLen = strlen(wpath);
 	int startAt = 0;
-	if(wpath[0] == '/') { 
+	if(wpath[0] == UT_SLASH) { 
 		endLen--;
 		startAt = 1;
+	}
+	if(wpath[endLen] == UT_SLASH) {
+		wpath[endLen] = '\0';
+		endLen--;
 	}
 	delete [] wpath2;
 	if (endLen < maxlen && buffer != NULL) { /* we have a buffer, and we have room in buffer */
@@ -119,12 +123,15 @@ int main(int argc, char** args) {
 	if(argc < 2) {
 		exit(1);
 	}
-//   char absPath[_MAX_PATH], absPath2[_MAX_PATH];
-//	absPath[0] = '\0';
-//	absPath2[0] = '\0';
+	//char absPath[_MAX_PATH], absPath2[_MAX_PATH];
+	//absPath[0] = '\0';
+	//absPath2[0] = '\0';
 	char * absPath; char * absPath2;
 	absPath2 = _ffullpath(NULL, args[1], _MAX_PATH); 
 	absPath = _fullpath (NULL, args[1], _MAX_PATH);
+	//_ffullpath(absPath2, args[1], _MAX_PATH);
+	//_fullpath (absPath, args[1], _MAX_PATH);
+
 	if (absPath == NULL || absPath2 == NULL) {
 		if (absPath == NULL)
 			printf("\x1b[%dmPRIO returned NULL\x1b[0m\n\n", 31);
