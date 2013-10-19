@@ -3,12 +3,12 @@ noborland
 Alternatives to some borland-functions in https://github.com/kartverket/fyba/tree/master/src/UT
 
 
-UT_splitpath_free
+UT\_splitpath\_free
 =================
 Mimics UT_splitpath . 
 Testcases can be found in the supplied makefile.
 The only know failure to mimic is when the resulting dir,
-fname or ext extends beyond _MAX_DIR, _MAX_FNAME and  _MAX_EXT
+fname or ext extends beyond \_MAX\_DIR, \_MAX\_FNAME and  \_MAX\_EXT
 
 _ffullpath
 ==========
