@@ -47,7 +47,6 @@ char * _ffullpath(char *buffer, const char *pathname, size_t maxlen) {
 		return NULL;
 	}
 
-	buffer[0] = '\0';
 	strncpy(wpath, pathname, _MAX_PATH);	
 	strncpy(wpath2, pathname, _MAX_PATH);
 
@@ -58,8 +57,16 @@ char * _ffullpath(char *buffer, const char *pathname, size_t maxlen) {
 	}
 
 	char * prevPos = NULL;
-
-	char prev[5] = { UT_SLASH, '.', '.', UT_SLASH, '\0' };
+	
+	char same[4] = { UT_SLASH, '.', UT_SLASH, '\0' }; // e.g. "/./"
+    /* replace /./ with nothing */
+    while ((prevPos = strstr(wpath, same)) != NULL) {
+        prevPos[1] = '\0';
+        UT_StrCopy(wpath2, wpath, _MAX_PATH);
+        strncat(wpath2, (prevPos+strlen(same)), _MAX_PATH);
+        UT_StrCopy(wpath, wpath2, _MAX_PATH);
+    }
+	char prev[5] = { UT_SLASH, '.', '.', UT_SLASH, '\0' }; // e.g "/../"
 
 	int i = -1;
 	/* Remove /../ and parent folder */
@@ -73,17 +80,6 @@ char * _ffullpath(char *buffer, const char *pathname, size_t maxlen) {
 		UT_StrCopy(wpath, wpath2, _MAX_PATH);
 		i = -1;
 	}
-
-	char same[4] = { UT_SLASH, '.', UT_SLASH, '\0' };
-
-	/* replace /./ with nothing */
-	while ((prevPos = strstr(wpath, same)) != NULL) {
-        prevPos[1] = '\0';
-		UT_StrCopy(wpath2, wpath, _MAX_PATH);
-        strncat(wpath2, (prevPos+strlen(same)), _MAX_PATH);
-        UT_StrCopy(wpath, wpath2, _MAX_PATH);
-        i = -1;
-    }
 	
 	/* prepend cwd on relative paths */
 	if(wpath[0] != UT_SLASH) {
@@ -93,29 +89,34 @@ char * _ffullpath(char *buffer, const char *pathname, size_t maxlen) {
 			return NULL;
 		}
 		/* getcwd gives ut the path w/o ending slash */
-		char slash[2] =  {UT_SLASH, '\0'};
-		strncat(wpath2, slash, _MAX_PATH-(strlen(wpath2)+1));
+		strncat(wpath2, UT_STR_SLASH, _MAX_PATH-(strlen(wpath2)+1));
 		strncat(wpath2, wpath, _MAX_PATH)-(strlen(wpath2)+1);
 		UT_StrCopy(wpath, wpath2, _MAX_PATH);
 	}
 
-	
-	//printf("PATH: %s\n", wpath);
 	int endLen = strlen(wpath);
 	int startAt = 0;
 	if(wpath[0] == '/') { 
 		endLen--;
 		startAt = 1;
 	}
-
-	if (endLen < maxlen) {
+	delete [] wpath2;
+	if (endLen < maxlen && buffer != NULL) { /* we have a buffer, and we have room in buffer */
        	UT_StrCopy(buffer, (wpath+startAt), maxlen);
 		delete [] wpath;
-    	delete [] wpath2;
 		return buffer;
-	} else {
+	} else if (buffer == NULL) { /* we have no buffer */
+		char * tempbuf;
+		if ((tempbuf = (char*)UT_MALLOC(endLen+1)) != NULL) {
+			UT_StrCopy(tempbuf, (wpath+startAt), (endLen+1));
+			delete [] wpath;
+			return tempbuf;
+		} else { /* failed to alloc memory*/
+			delete [] wpath;
+            return NULL;
+		}
+	} else { /* not room in buffer and we were supposed to use the buffer */
 		delete [] wpath;
-    	delete [] wpath2;
 		return NULL;
 	}
 }
@@ -124,19 +125,26 @@ int main(int argc, char** args) {
 	if(argc < 2) {
 		exit(1);
 	}
-	//	printf("Input: %s\n", args[1]);
-	
-   char absPath[_MAX_PATH], absPath2[_MAX_PATH];
-	absPath[0] = '\0';
-	absPath2[0] = '\0';
-	_ffullpath(absPath2, args[1], _MAX_PATH); 
-	_fullpath (absPath, args[1], _MAX_PATH);
-	if (!(strcmp(absPath, absPath2) == 0)) {
-		printf("THEY DIFFER:\n");
-		printf("PRIO: '%s'\n", absPath);
-		printf("FREE: '%s'\n\n", absPath2);   		
-	} else {
-		printf("BOTH: '%s'\n\n", absPath);
+//   char absPath[_MAX_PATH], absPath2[_MAX_PATH];
+//	absPath[0] = '\0';
+//	absPath2[0] = '\0';
+	char * absPath; char * absPath2;
+	absPath2 = _ffullpath(NULL, args[1], _MAX_PATH); 
+	absPath = _fullpath (NULL, args[1], _MAX_PATH);
+	if (absPath == NULL || absPath2 == NULL) {
+		if (absPath == NULL)
+			printf("\x1b[%dmPRIO returned NULL\x1b[0m\n\n", 31);
+		if (absPath2 == NULL)
+			printf("\x1b[%dmFREE returned NULL\x1b[0m\n\n", 31);
+		
+		return 0;
 	}
+	if (!(strcmp(absPath, absPath2) == 0)) {
+		printf("\x1b[%dmPRIO: '%s'\n", 31, absPath);
+		printf("FREE: '%s'\x1b[0m\n\n", absPath2);   		
+	} else {
+		printf("\x1b[%dmBOTH: '%s'\x1b[0m\n\n", 32, absPath);
+	}
+	UT_FREE(absPath); UT_FREE(absPath2);
 }
 

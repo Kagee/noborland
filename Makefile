@@ -34,7 +34,9 @@ ifneq (,$(findstring fplinux,$(TEST_ON)))
 	$(TEST_PROGNAME) "./path/from/./to/../file.cpp"	
 #   and this...
 	$(TEST_PROGNAME) "/path/../"
+	$(TEST_PROGNAME) "/path/../foo.txt"
 	$(TEST_PROGNAME) "/path/./file.cpp"
+	$(TEST_PROGNAME) "horrible/./../path/again"
 endif
 
 ifneq (,$(findstring splinux,$(TEST_ON)))
