@@ -1,14 +1,5 @@
-#include <cstdio>
-#include <cstdlib>
 #include <cstring>
-#include <climits>
 #include <fyut.h>
-
-#include<libgen.h>
-
-
-void UT_splitpath(const char *pathP, char *driveP, char *dirP,
-                  char *nameP, char *extP);
 
 void UT_splitFN(char *filename, char* name, char* ext) {
 	char* lastDot = strrchr(filename, '.');
@@ -99,9 +90,6 @@ void UT_splitpath_free(const char *pathP, char *driveP, char *dirP,
 }
 
 int main(int argc, char** args) {
-	if(argc < 2) {
-		exit(1);
-	}
 	
    char fil[_MAX_PATH],sdir[_MAX_PATH];
    char drive1[_MAX_DRIVE],dir1[_MAX_DIR],fname1[_MAX_FNAME],ext1[_MAX_EXT];
